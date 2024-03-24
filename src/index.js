@@ -1,5 +1,11 @@
 "use strict";
 
+const {
+  likePostMutation,
+  getLikePostResolver,
+  likePostMutationConfig,
+} = require("./api/post/graphql/post");
+
 module.exports = {
   /**
    * An asynchronous register function that runs before
@@ -7,7 +13,22 @@ module.exports = {
    *
    * This gives you an opportunity to extend code.
    */
-  register(/*{ strapi }*/) {},
+  register({ strapi }) {
+    const extensionService = strapi.plugin("graphql").service("extension");
+    const extension = ({ nexus }) => ({
+      // GraphQL SDL
+      typeDefs: likePostMutation,
+      resolvers: {
+        Mutation: {
+          likePost: getLikePostResolver(strapi),
+        },
+      },
+      resolversConfig: {
+        "Mutation.likePost": likePostMutationConfig,
+      },
+    });
+    extensionService.use(extension);
+  },
 
   /**
    * An asynchronous bootstrap function that runs before
